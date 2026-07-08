@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: nginx-appset
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - env: dev
+          - env: staging
+          - env: production
+  template:
+    metadata:
+      name: '{{env}}-nginx'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/umamaheswaritalupuri/nginx-deployment-lab.git'
+        targetRevision: HEAD
+        path: '{{env}}'
+      destination:
+        server: 'https://default.svc'
+        namespace: '{{env}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
